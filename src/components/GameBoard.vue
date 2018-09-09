@@ -1,5 +1,15 @@
 <template>
-  <canvas id="game" ref="game" :width="widthCanvas" :height="heightCanvas"></canvas>
+  <div class="game-container">
+    <div class="left-controls">
+      <button class="up"></button>
+      <button class="left"></button>
+    </div>
+    <canvas id="game" ref="game" :width="widthCanvas" :height="heightCanvas"></canvas>
+    <div class="right-controls">
+      <button class="right"></button>
+      <button class="down"></button>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -13,6 +23,7 @@ export default {
       counterForMVMT: null,
       whileWalking: false,
       keyName: null,
+      touchEvent: null,
       resettingGame: false
     }
   },
@@ -88,6 +99,42 @@ export default {
       document.addEventListener('keyup', (event) => {
         event.preventDefault()
         this.keyName = null
+      })
+
+      document.querySelector('.left-controls .up').addEventListener('touchstart', (event) => {
+        event.preventDefault()
+        this.touchEvent = 'ArrowUp'
+      })
+      document.querySelector('.left-controls .up').addEventListener('touchend', (event) => {
+        event.preventDefault()
+        this.touchEvent = null
+      })
+
+      document.querySelector('.right-controls .down').addEventListener('touchstart', (event) => {
+        event.preventDefault()
+        this.touchEvent = 'ArrowDown'
+      })
+      document.querySelector('.right-controls .down').addEventListener('touchend', (event) => {
+        event.preventDefault()
+        this.touchEvent = null
+      })
+
+      document.querySelector('.left-controls .left').addEventListener('touchstart', (event) => {
+        event.preventDefault()
+        this.touchEvent = 'ArrowLeft'
+      })
+      document.querySelector('.left-controls .left').addEventListener('touchend', (event) => {
+        event.preventDefault()
+        this.touchEvent = null
+      })
+
+      document.querySelector('.right-controls .right').addEventListener('touchstart', (event) => {
+        event.preventDefault()
+        this.touchEvent = 'ArrowRight'
+      })
+      document.querySelector('.right-controls .right').addEventListener('touchend', (event) => {
+        event.preventDefault()
+        this.touchEvent = null
       })
     },
     drawCharacter (position) {
@@ -256,8 +303,8 @@ export default {
     await this.initCharacter()
 
     setInterval(function () {
-      if (this.keyName && !this.isWalking && !this.resettingGame) {
-        this.moveCharacter(this.keyName)
+      if ((this.keyName || this.touchEvent) && !this.isWalking && !this.resettingGame) {
+        this.moveCharacter(this.keyName || this.touchEvent)
       }
       this.drawMap()
       if (!this.resettingGame) {
@@ -268,7 +315,31 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
+.left-controls,
+.right-controls {
+  display: none;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
 
+  @media screen and (orientation: landscape) and (max-device-width: 768px) {
+    display: flex;
+  }
+  button {
+    display: block;
+    flex: 1;
+    width: 150px;
+    appearance: none;
+    background: transparent;
+    border: none;
+  }
+}
+.left-controls {
+  left: 0;
+}
+.right-controls {
+  right: 0;
+}
 </style>
