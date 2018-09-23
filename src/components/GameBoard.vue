@@ -4,6 +4,7 @@
       <button class="up"></button>
       <button class="left"></button>
     </div>
+    <div class="score">Score: {{ score }}</div>
     <canvas id="game" ref="game" :width="widthCanvas" :height="heightCanvas"></canvas>
     <div class="right-controls">
       <button class="right"></button>
@@ -24,15 +25,18 @@ export default {
       whileWalking: false,
       keyName: null,
       touchEvent: null,
-      resettingGame: false
+      resettingGame: false,
+      score: 0,
+      map: null,
+      currentLevel: 1
     }
   },
   computed: {
     widthCanvas () {
-      return this.gameOptions.map[0].length * this.gameOptions.tileSize
+      return this.map[0].length * this.gameOptions.tileSize
     },
     heightCanvas () {
-      return this.gameOptions.map.length * this.gameOptions.tileSize
+      return this.map.length * this.gameOptions.tileSize
     }
   },
   methods: {
@@ -42,8 +46,14 @@ export default {
       spriteImgMap.width = this.gameOptions.tileSize
       spriteImgMap.height = this.gameOptions.tileSize
 
+      var canvas = this.$refs.game
+      canvas.width = this.widthCanvas * 2
+      canvas.height = this.heightCanvas * 2
+      canvas.style.width = this.widthCanvas + 'px'
+      canvas.style.height = this.heightCanvas + 'px'
+      this.$refs.game.getContext('2d').scale(2, 2)
       var ctx = this.$refs.game.getContext('2d')
-      ctx.clearRect(0, 0, this.gameOptions.map[0].length * this.gameOptions.tileSize, this.gameOptions.map.length * this.gameOptions.tileSize)
+      ctx.clearRect(0, 0, this.map[0].length * this.gameOptions.tileSize, this.map.length * this.gameOptions.tileSize)
 
       return {
         ctx,
@@ -62,11 +72,11 @@ export default {
       this.drawAction(ctx, spriteImgMap)
     },
     drawAction (ctx, spriteImgMap) {
-      for (var i = 0; i < this.gameOptions.map.length; i++) {
-        var row = this.gameOptions.map[i]
+      for (var i = 0; i < this.map.length; i++) {
+        var row = this.map[i]
         for (var j = 0; j < row.length; j++) {
           var tileSize = this.gameOptions.tileSize
-          ctx.drawImage(spriteImgMap, parseInt(row[j]) * tileSize, 0, tileSize, tileSize, tileSize * j, tileSize * i, tileSize, tileSize)
+          ctx.drawImage(spriteImgMap, parseInt(row[j]) * (tileSize * 2), 0, tileSize * 2, tileSize * 2, tileSize * j, tileSize * i, tileSize, tileSize)
         }
       }
     },
@@ -89,17 +99,15 @@ export default {
 
       spriteImgCharacter.onload = await function () {
         var tileSize = this.gameOptions.tileSize
-        ctx.drawImage(spriteImgCharacter, 0, 0, tileSize, tileSize, this.positionCharacter[0] * tileSize, this.positionCharacter[1] * tileSize, tileSize, tileSize)
+        ctx.drawImage(spriteImgCharacter, 0, 0, tileSize * 2, tileSize * 2, this.positionCharacter[0] * tileSize, this.positionCharacter[1] * tileSize, tileSize, tileSize)
       }.bind(this)
 
-      document.addEventListener('keydown', (event) => {
-        event.preventDefault()
+      window.addEventListener('keydown', (event) => {
         this.keyName = event.key
-      })
-      document.addEventListener('keyup', (event) => {
-        event.preventDefault()
+      }, true)
+      window.addEventListener('keyup', () => {
         this.keyName = null
-      })
+      }, true)
 
       document.querySelector('.left-controls .up').addEventListener('touchstart', (event) => {
         event.preventDefault()
@@ -209,7 +217,7 @@ export default {
 
       var ctx = this.$refs.game.getContext('2d')
 
-      ctx.drawImage(spriteImgCharacter, positionOnSprite, 0, tileSize, tileSize, positionX, positionY, tileSize, tileSize)
+      ctx.drawImage(spriteImgCharacter, positionOnSprite * 2, 0, tileSize * 2, tileSize * 2, positionX, positionY, tileSize, tileSize)
     },
     moveCharacter (keyName) {
       switch (keyName) {
@@ -246,7 +254,8 @@ export default {
           }
           break
       }
-      this.counterForMVMT = 6
+      
+      this.counterForMVMT = 2
       var mvmt = setInterval(function() {
         this.drawCharacter(this.positionCharacter)
         this.counterForMVMT--
@@ -254,34 +263,40 @@ export default {
           this.whileWalking = false
           this.isWalking = false
           this.counterForMVMT = null
+          if (this.map[this.positionCharacter[1]][this.positionCharacter[0]] === 7) {
+            this.map[this.positionCharacter[1]][this.positionCharacter[0]] = 0
+            this.score++
+          }
           clearInterval(mvmt)
-          if (this.gameOptions.map[this.positionCharacter[1]][this.positionCharacter[0]] === 5 && !this.resettingGame) {
+          if (this.map[this.positionCharacter[1]][this.positionCharacter[0]] === 5 && !this.resettingGame) {
             this.resettingGame = true
-            this.gameOptions.map[this.positionCharacter[1]][this.positionCharacter[0]] = 6
+            this.currentLevel++
+            this.direction = 'down'
+            this.map[this.positionCharacter[1]][this.positionCharacter[0]] = 6
             setTimeout(function() {
               this.resetGame()
             }.bind(this), 1000)
           }
         }
-      }.bind(this), 20)
+      }.bind(this), 50)
     },
     canMove (direction) {
       var nextTile = null
       if (this.whileWalking) {
-        nextTile = this.gameOptions.map[this.positionCharacter[1]][this.positionCharacter[0]]
+        nextTile = this.map[this.positionCharacter[1]][this.positionCharacter[0]]
       } else {
         switch (direction) {
           case 'up':
-            nextTile = this.gameOptions.map[this.positionCharacter[1] - 1] ? this.gameOptions.map[this.positionCharacter[1] - 1][this.positionCharacter[0]] : undefined
+            nextTile = this.map[this.positionCharacter[1] - 1] ? this.map[this.positionCharacter[1] - 1][this.positionCharacter[0]] : undefined
             break
           case 'down':
-            nextTile = this.gameOptions.map[this.positionCharacter[1] + 1] ? this.gameOptions.map[this.positionCharacter[1] + 1][this.positionCharacter[0]] : undefined
+            nextTile = this.map[this.positionCharacter[1] + 1] ? this.map[this.positionCharacter[1] + 1][this.positionCharacter[0]] : undefined
             break
           case 'left':
-            nextTile = this.gameOptions.map[this.positionCharacter[1]][this.positionCharacter[0] - 1]
+            nextTile = this.map[this.positionCharacter[1]][this.positionCharacter[0] - 1]
             break
           case 'right':
-            nextTile = this.gameOptions.map[this.positionCharacter[1]][this.positionCharacter[0] + 1]
+            nextTile = this.map[this.positionCharacter[1]][this.positionCharacter[0] + 1]
             break
         }
       }
@@ -289,9 +304,27 @@ export default {
     },
     resetGame () {
       this.resettingGame = false
-      this.gameOptions.map[this.positionCharacter[1]][this.positionCharacter[0]] = 5
+      if (!this.gameOptions.levels[this.currentLevel]) {
+        this.currentLevel = 1
+      }
+      this.map = JSON.parse(JSON.stringify(this.gameOptions.levels[this.currentLevel]))
+      this.map[this.positionCharacter[1]][this.positionCharacter[0]] = 5
       this.positionCharacter = Object.assign([], this.gameOptions.initPositionCharacter)
-    }
+    },
+    loopGame () {
+      if ((this.keyName || this.touchEvent) && !this.isWalking && !this.resettingGame) {
+        this.moveCharacter(this.keyName || this.touchEvent)
+      }
+      this.drawMap()
+      if (!this.resettingGame) {
+        this.drawCharacter(this.positionCharacter)
+      }
+
+      setTimeout(this.loopGame, 40)
+    },
+  },
+  created () {
+    this.map = JSON.parse(JSON.stringify(this.gameOptions.levels[this.currentLevel]))
   },
   async mounted () {
     this.positionCharacter = Object.assign([], this.gameOptions.initPositionCharacter)
@@ -302,15 +335,7 @@ export default {
     // Init character
     await this.initCharacter()
 
-    setInterval(function () {
-      if ((this.keyName || this.touchEvent) && !this.isWalking && !this.resettingGame) {
-        this.moveCharacter(this.keyName || this.touchEvent)
-      }
-      this.drawMap()
-      if (!this.resettingGame) {
-        this.drawCharacter(this.positionCharacter)
-      }
-    }.bind(this), 20)
+    this.loopGame() 
   }
 }
 </script>
@@ -341,5 +366,8 @@ export default {
 }
 .right-controls {
   right: 0;
+}
+.score {
+  font-size: 20px;
 }
 </style>
