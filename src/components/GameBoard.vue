@@ -28,7 +28,7 @@ export default {
       resettingGame: false,
       score: 0,
       map: null,
-      currentLevel: 1
+      currentLevel: 4
     }
   },
   computed: {
@@ -308,7 +308,6 @@ export default {
         this.currentLevel = 1
       }
       this.map = JSON.parse(JSON.stringify(this.gameOptions.levels[this.currentLevel]))
-      this.map[this.positionCharacter[1]][this.positionCharacter[0]] = 5
       this.positionCharacter = Object.assign([], this.gameOptions.initPositionCharacter)
     },
     loopGame () {
