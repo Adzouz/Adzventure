@@ -28,7 +28,7 @@ export default {
       resettingGame: false,
       score: 0,
       map: null,
-      currentLevel: 4
+      currentLevel: 1
     }
   },
   computed: {
