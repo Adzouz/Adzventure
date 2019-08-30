@@ -14,9 +14,10 @@
 </template>
 
 <script>
+import gameOptions from '../gameOptions'
+
 export default {
   name: 'GameBoard',
-  props: ['gameOptions'],
   data () {
     return {
       direction: 'down',
@@ -33,18 +34,19 @@ export default {
   },
   computed: {
     widthCanvas () {
-      return this.map[0].length * this.gameOptions.tileSize
+      return this.map[0].length * gameOptions.tileSize
     },
     heightCanvas () {
-      return this.map.length * this.gameOptions.tileSize
+      return this.map.length * gameOptions.tileSize
     }
   },
   methods: {
     mapCreation () {
       var spriteImgMap = new Image()
-      spriteImgMap.src = require('../assets/' + this.gameOptions.assetsMap)
-      spriteImgMap.width = this.gameOptions.tileSize
-      spriteImgMap.height = this.gameOptions.tileSize
+      const imgUrl = gameOptions.assetsMap
+      spriteImgMap.src = require('@/assets/' + imgUrl)
+      spriteImgMap.width = gameOptions.tileSize
+      spriteImgMap.height = gameOptions.tileSize
 
       var canvas = this.$refs.game
       canvas.width = this.widthCanvas * 2
@@ -53,7 +55,7 @@ export default {
       canvas.style.height = this.heightCanvas + 'px'
       this.$refs.game.getContext('2d').scale(2, 2)
       var ctx = this.$refs.game.getContext('2d')
-      ctx.clearRect(0, 0, this.map[0].length * this.gameOptions.tileSize, this.map.length * this.gameOptions.tileSize)
+      ctx.clearRect(0, 0, this.map[0].length * gameOptions.tileSize, this.map.length * gameOptions.tileSize)
 
       return {
         ctx,
@@ -75,30 +77,35 @@ export default {
       for (var i = 0; i < this.map.length; i++) {
         var row = this.map[i]
         for (var j = 0; j < row.length; j++) {
-          var tileSize = this.gameOptions.tileSize
+          var tileSize = gameOptions.tileSize
           ctx.drawImage(spriteImgMap, parseInt(row[j]) * (tileSize * 2), 0, tileSize * 2, tileSize * 2, tileSize * j, tileSize * i, tileSize, tileSize)
         }
       }
     },
     async initCharacter () {
       var preloadImage = new Image();
-      preloadImage.src = require('../assets/' + this.gameOptions.assetsCharacter.up)
+      const imgUpUrl = gameOptions.assetsCharacter.up
+      preloadImage.src = require('@/assets/' + imgUpUrl)
       preloadImage = new Image();
-      preloadImage.src = require('../assets/' + this.gameOptions.assetsCharacter.down)
+      const imgDownUrl = gameOptions.assetsCharacter.down
+      preloadImage.src = require('@/assets/' + imgDownUrl)
       preloadImage = new Image();
-      preloadImage.src = require('../assets/' + this.gameOptions.assetsCharacter.left)
+      const imgLeftUrl = gameOptions.assetsCharacter.left
+      preloadImage.src = require('@/assets/' + imgLeftUrl)
       preloadImage = new Image();
-      preloadImage.src = require('../assets/' + this.gameOptions.assetsCharacter.right)
+      const imgRightUrl = gameOptions.assetsCharacter.right
+      preloadImage.src = require('@/assets/' + imgRightUrl)
 
       var spriteImgCharacter = new Image()
-      spriteImgCharacter.src = require('../assets/' + this.gameOptions.assetsCharacter.fixed)
-      spriteImgCharacter.width = this.gameOptions.tileSize
-      spriteImgCharacter.height = this.gameOptions.tileSize
+      const imgCharacterUrl = gameOptions.assetsCharacter.fixed
+      spriteImgCharacter.src = require('@/assets/' + imgCharacterUrl)
+      spriteImgCharacter.width = gameOptions.tileSize
+      spriteImgCharacter.height = gameOptions.tileSize
 
       var ctx = this.$refs.game.getContext('2d')
 
       spriteImgCharacter.onload = await function () {
-        var tileSize = this.gameOptions.tileSize
+        var tileSize = gameOptions.tileSize
         ctx.drawImage(spriteImgCharacter, 0, 0, tileSize * 2, tileSize * 2, this.positionCharacter[0] * tileSize, this.positionCharacter[1] * tileSize, tileSize, tileSize)
       }.bind(this)
 
@@ -146,15 +153,17 @@ export default {
       })
     },
     drawCharacter (position) {
-      var tileSize = this.gameOptions.tileSize
+      var tileSize = gameOptions.tileSize
       var spriteImgCharacter = new Image()
-      spriteImgCharacter.src = require('../assets/' + this.gameOptions.assetsCharacter.fixed)
+      const imgCharacterUrl = gameOptions.assetsCharacter.fixed
+      spriteImgCharacter.src = require('@/assets/' + imgCharacterUrl)
       var positionOnSprite = 0
       var positionX = 0
       var positionY = 0
       if (this.direction === 'up') {
         if (this.isWalking && this.counterForMVMT) {
-          spriteImgCharacter.src = require('../assets/' + this.gameOptions.assetsCharacter.up)
+          const imgCharacterUpUrl = gameOptions.assetsCharacter.up
+          spriteImgCharacter.src = require('@/assets/' + imgCharacterUpUrl)
           positionOnSprite = tileSize * (6 - this.counterForMVMT)
           positionX = position[0] * tileSize
           if (this.canMove(this.direction)) {
@@ -169,7 +178,8 @@ export default {
         }
       } else if (this.direction === 'left') {
         if (this.isWalking && this.counterForMVMT) {
-          spriteImgCharacter.src = require('../assets/' + this.gameOptions.assetsCharacter.left)
+          const imgCharacterLeftUrl = gameOptions.assetsCharacter.left
+          spriteImgCharacter.src = require('@/assets/' + imgCharacterLeftUrl)
           positionOnSprite = tileSize * (6 - this.counterForMVMT)
           if (this.canMove(this.direction)) {
             positionX = (position[0] + 1) * tileSize - Math.round(tileSize / this.counterForMVMT)
@@ -184,7 +194,8 @@ export default {
         }
       } else if (this.direction === 'right') {
         if (this.isWalking && this.counterForMVMT) {
-          spriteImgCharacter.src = require('../assets/' + this.gameOptions.assetsCharacter.right)
+          const imgCharacterRightUrl = gameOptions.assetsCharacter.right
+          spriteImgCharacter.src = require('@/assets/' + imgCharacterRightUrl)
           positionOnSprite = tileSize * (6 - this.counterForMVMT)
           if (this.canMove(this.direction)) {
             positionX = (position[0] - 1) * tileSize + Math.round(tileSize / this.counterForMVMT)
@@ -199,7 +210,8 @@ export default {
         }
       } else if (this.direction === 'down') {
         if (this.isWalking && this.counterForMVMT) {
-          spriteImgCharacter.src = require('../assets/' + this.gameOptions.assetsCharacter.down)
+          const imgCharacterDownUrl = gameOptions.assetsCharacter.down
+          spriteImgCharacter.src = require('@/assets/' + imgCharacterDownUrl)
           positionOnSprite = tileSize * (6 - this.counterForMVMT)
           positionX = position[0] * tileSize
           if (this.canMove(this.direction)) {
@@ -300,15 +312,15 @@ export default {
             break
         }
       }
-      return typeof nextTile !== 'undefined' && this.gameOptions.forbidden.indexOf(nextTile) < 0
+      return typeof nextTile !== 'undefined' && gameOptions.forbidden.indexOf(nextTile) < 0
     },
     resetGame () {
       this.resettingGame = false
-      if (!this.gameOptions.levels[this.currentLevel]) {
+      if (!gameOptions.levels[this.currentLevel]) {
         this.currentLevel = 1
       }
-      this.map = JSON.parse(JSON.stringify(this.gameOptions.levels[this.currentLevel]))
-      this.positionCharacter = Object.assign([], this.gameOptions.initPositionCharacter)
+      this.map = JSON.parse(JSON.stringify(gameOptions.levels[this.currentLevel]))
+      this.positionCharacter = Object.assign([], gameOptions.initPositionCharacter)
     },
     loopGame () {
       if ((this.keyName || this.touchEvent) && !this.isWalking && !this.resettingGame) {
@@ -323,10 +335,10 @@ export default {
     },
   },
   created () {
-    this.map = JSON.parse(JSON.stringify(this.gameOptions.levels[this.currentLevel]))
+    this.map = JSON.parse(JSON.stringify(gameOptions.levels[this.currentLevel]))
   },
   async mounted () {
-    this.positionCharacter = Object.assign([], this.gameOptions.initPositionCharacter)
+    this.positionCharacter = Object.assign([], gameOptions.initPositionCharacter)
 
     // Map generation
     this.initMap()
