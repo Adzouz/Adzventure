@@ -48,8 +48,9 @@ export default {
     stop(e) {
       if (this.tileBeginArea) {
         this.tilesToSet = []
-        for (var i = this.tileBeginArea[0]; i <= parseInt(e.target.getAttribute('data-row')); i++) {
-          for (var j = this.tileBeginArea[1]; j <= parseInt(e.target.getAttribute('data-col')); j++) {
+        let areaTiles = this.getAreaTiles([this.tileBeginArea[0], this.tileBeginArea[1]], [e.target.getAttribute('data-row'), e.target.getAttribute('data-col')])
+        for (var i = areaTiles.begin[0]; i <= areaTiles.end[0]; i++) {
+          for (var j = areaTiles.begin[1]; j <= areaTiles.end[1]; j++) {
             this.tilesToSet.push([i, j])
           }
         }
@@ -58,10 +59,11 @@ export default {
     },
     end(e) {
       if (this.tileBeginArea) {
+        let areaTiles = this.getAreaTiles([this.tileBeginArea[0], this.tileBeginArea[1]], [e.target.getAttribute('data-row'), e.target.getAttribute('data-col')])
         document.querySelectorAll('tr').forEach((row, indexRow) => {
-          if (indexRow >= this.tileBeginArea[0] && indexRow <= e.target.getAttribute('data-row')) {
+          if (indexRow >= areaTiles.begin[0] && indexRow <= areaTiles.end[0]) {
             row.querySelectorAll('td').forEach((col, indexCol) => {
-              if (indexCol >= this.tileBeginArea[1] && indexCol <= e.target.getAttribute('data-col')) {
+              if (indexCol >= areaTiles.begin[1] && indexCol <= areaTiles.end[1]) {
                 col.className = 'hovered'
               } else {
                 col.className = ''
@@ -74,6 +76,19 @@ export default {
       } else {
         document.querySelectorAll('td').forEach(td => td.className = '')
       }
+    },
+    getAreaTiles(begin, end) {
+      let areaTiles = {
+        begin: [parseInt(begin[0]), parseInt(begin[1])],
+        end: [parseInt(end[0]), parseInt(end[1])]
+      }
+      if (areaTiles.begin[0] > areaTiles.end[0] && areaTiles.begin[1] > areaTiles.end[1]) {
+        areaTiles = {
+          begin: [parseInt(end[0]), parseInt(end[1])],
+          end: [parseInt(begin[0]), parseInt(begin[1])]
+        }
+      }
+      return areaTiles
     },
     getTileBg(indexRow, indexColumn) {
       var foundItem = this.savedTiles.find(st => st.row === indexRow && st.col === indexColumn)
