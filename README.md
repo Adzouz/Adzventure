@@ -4,7 +4,7 @@ Control the character with the arrows.
 
 💙 *Made with Vue.js* 💚
 
-Demo available at: https://adzventure.alaqasar.com
+Demo available at: https://thewebsdoor.github.io/Adzventure/
 
 ## Project setup
 ```
